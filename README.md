@@ -13,3 +13,15 @@ apt install curl
 curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | sudo bash
 apt install speedtest
 ```
+
+## Creating logging directory
+
+```
+mkdir /var/log/internet-speed
+```
+
+## Activating the virtual env
+
+```
+source /opt/internet-speed/venv/bin/activate
+```
