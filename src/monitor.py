@@ -16,7 +16,7 @@ handler = RotatingFileHandler(
 )
 handler.setLevel(logging.INFO)
 
-formatter = logging.Formatter('%(asctime)s %(levelname)s:%(message)s')
+formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
@@ -25,25 +25,15 @@ default = {
     'upload': 0
 }
 
-# Gets download speed in Mb/s
-def get_download_speed(download_info):
-    elapsed = download_info.get('elapsed', 0)
-    if (elapsed==0):
-        return 0
-    return download_info.get('bytes', 0)/(elapsed * 125)
-
-# Gets upload speed in Mb/s
-def get_upload_speed(upload_info):
-    elapsed = upload_info.get('elapsed', 0)
-    if (elapsed==0):
-        return 0
-    return upload_info['bytes']/(upload_info['elapsed'] * 125)
+# Converts b/s to Mb/s
+def convert_bps_to_Mbps(bytes_per_second):
+    return bytes_per_second / 125000
 
 def get_internet_speed():
     try:
         logger.info('Running speed test...')
         output_bytes = run(
-                ["speedtest", "--format=json"], 
+                ["speedtest", "--format=json", "--server-id=23968,40628,72004"], 
                 capture_output=True,
                 timeout=60,
                 check=True
@@ -64,11 +54,37 @@ def get_internet_speed():
         logger.error("Failed to parse speedtest output")
         return default
 
-    download_speed = get_download_speed(output.get('download', {}))
-    upload_speed = get_upload_speed(output.get('upload', {}))
+    timestamp = output.get('timestamp', 0)
+    if (timestamp == 0):
+        logger.error("Timestamp can't be 0.")
+        raise Exception()
+    ping = output.get('ping', {})
+    download = output.get('download', {})
+    upload = output.get('upload', {})
+    packet_loss = output.get('packetLoss', 0)
+    isp = output.get('isp', "")
+    interface = output.get('interface', {})
+    server = output.get('server', {})
     return {
-            'download': download_speed,
-            'upload': upload_speed
+            'timestamp' : timestamp
+            'ping': {
+                'jitter':ping.get('jitter', 100),
+                'latency': ping.get('latency', 100)
+            }
+            'download': {
+                'download_speed': convert_bps_to_Mbps(download.get('bandwidth', 0)),
+                'latency' : {
+                    'iqm': download.get('latency', {}).get('iqm', 100),
+                    'jitter': download.get('latency', {}).get('jitter', 100)
+                }
+            }
+            'upload' : {
+                'upload_speed': convert_bps_to_Mbps(upload.get('bandwidth', 100)),
+                'latency' : {
+                    'iqm': upload.get('latency', {}).get('iqm', 100),
+                    'jitter': upload.get('latency', {}).get('jitter', 100)
+                }
+            }
         }
 
 if __name__ == "__main__":
