@@ -27,10 +27,16 @@ default = {
 
 # Gets download speed in Mb/s
 def get_download_speed(download_info):
-    return download_info['bytes']/(download_info['elapsed'] * 125)
+    elapsed = download_info.get('elapsed', 0)
+    if (elapsed==0):
+        return 0
+    return download_info.get('bytes', 0)/(elapsed * 125)
 
 # Gets upload speed in Mb/s
 def get_upload_speed(upload_info):
+    elapsed = upload_info.get('elapsed', 0)
+    if (elapsed==0):
+        return 0
     return upload_info['bytes']/(upload_info['elapsed'] * 125)
 
 def get_internet_speed():
@@ -58,8 +64,8 @@ def get_internet_speed():
         logger.error("Failed to parse speedtest output")
         return default
 
-    download_speed = get_download_speed(output['download'])
-    upload_speed = get_upload_speed(output['upload'])
+    download_speed = get_download_speed(output.get('download', {}))
+    upload_speed = get_upload_speed(output.get('upload', {}))
     return {
             'download': download_speed,
             'upload': upload_speed
