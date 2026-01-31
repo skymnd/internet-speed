@@ -1,7 +1,11 @@
 import logging
 from logging.handlers import RotatingFileHandler
 from json import loads as jsonload, JSONDecodeError
-from subprocess import run, TimeoutExpired, CalledProcessError
+from math import floor
+from subprocess import run, TimeoutExpired
+from socket import create_connection
+from time import perf_counter_ns
+from requests import get as http_get, Timeout
 
 log_filename = '/var/log/internet-speed/internet-speed.log'
 
@@ -37,11 +41,11 @@ def run_speedtest():
     except TimeoutExpired:
         logger.error("Speedtest took too long.")
         return {}
-    except CalledProcessError as err:
+    except Exception as err:
         logger.error("Speedtest failed.")
         logger.error(err.stderr)
         return {}
-    logger.info('Speed test succeeded.')
+    logger.info('Speedtest subprocess succeeded.')
     
     logger.info('Starting data processing...')
     try:
@@ -51,22 +55,19 @@ def run_speedtest():
         logger.error("Failed to parse speedtest output")
         return {}
 
-    timestamp = output.get('timestamp', 0)
-    if (timestamp == 0):
-        logger.error("Timestamp can't be 0.")
-        raise Exception()
     ping = output.get('ping', {})
     download = output.get('download', {})
     upload = output.get('upload', {})
     server = output.get('server', {})
+    logger.info('Finished speedtest.')
     return {
-            'timestamp' : timestamp,
+            'timestamp' : output.get('timestamp', None),
             'ping': {
                 'jitter':ping.get('jitter', None),
                 'latency': ping.get('latency', None)
             },
             'download': {
-                'download_speed': convert_bps_to_Mbps(download.get('bandwidth', 0)),
+                'download_speed': convert_bps_to_Mbps(download.get('bandwidth', None)),
                 'latency' : {
                     'iqm': download.get('latency', {}).get('iqm', None),
                     'jitter': download.get('latency', {}).get('jitter', None)
@@ -88,6 +89,82 @@ def run_speedtest():
             }
         }
 
+# Takes in a comma separated list of domains e.g.
+# "bbc.co.uk,google.co.uk,apple.com"
+def run_http_reachability_checks(domains):
+    logger.info('Starting HTTP reachability checks...')
+    domain_checks = {}
+    for domain in domains.split(','):
+        domain = domain.strip()
+        logger.debug(f"Domain: {domain}")
+        try:
+            start_time = perf_counter_ns()
+            response = http_get(f"https://{domain}", timeout=3)
+            response_time = perf_counter_ns() - start_time
+            logger.debug(f"Response for {domain}: {response}")
+        except Timeout:
+            logger.error(f"Request timed out for {domain}.")
+            domain_checks[domain] = {
+                'reachable': False,
+                'response_time_ms': None
+            }
+            continue
+        except Exception as err:
+            logger.error(f"Request failed for {domain}.")
+            logger.error(err)
+            domain_checks[domain] = {
+                'reachable': False,
+                'response_time_ms': None
+            }
+            continue
+        domain_checks[domain] = {
+            'reachable': 200 <= response.status_code < 300,
+            'response_time_ms': floor(response_time / 1_000) / 1_000
+        }
+    logger.info('Finished HTTP reachability checks.')
+    return domain_checks
+
+# Takes in a comma separated list of IP addresses e.g.
+# "1.1.1.1,8.8.8.8,192.168.1.111"
+def run_dns_reachability_checks(ip_addrs):
+    logger.info('Starting DNS reachability checks...')
+    ip_checks = {}
+    for ip_addr in ip_addrs.split(','):
+        ip_addr = ip_addr.strip()
+        logger.debug(f"IP Address: {ip_addr}")
+        try:
+            start_time = perf_counter_ns()
+            response = create_connection((ip_addr, 53), timeout=3)
+            response_time = perf_counter_ns() - start_time
+            response.close()
+            logger.debug(f"Response: {response}")
+        except TimeoutError:
+            logger.error(f"Request timed out for {ip_addr}.")
+            ip_checks[ip_addr] = {
+                'reachable': False,
+                'response_time_ms': None
+            }
+            continue
+        except Exception as err:
+            logger.error(f"Request failed for {ip_addr}")
+            logger.error(err)
+            ip_checks[ip_addr] = {
+                'reachable': False,
+                'response_time_ms': None
+            }
+            continue
+        ip_checks[ip_addr] = {
+                'reachable': True,
+                'response_time_ms': floor(response_time / 1_000) / 1_000
+            }
+    logger.info('Finished DNS reachability checks.')
+    return ip_checks
+
+
 if __name__ == "__main__":
     internet_speed = run_speedtest()
     print(internet_speed)
+    http_reachability_checks = run_http_reachability_checks("bbc.co.uk,google.co.uk,apple.com")
+    print(http_reachability_checks)
+    dns_reachability_checks = run_dns_reachability_checks("1.1.1.1,8.8.8.8,192.168.1.111")
+    print(dns_reachability_checks)
