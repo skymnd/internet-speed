@@ -1,5 +1,8 @@
 
+import logger
 from prometheus_client import Gauge, Info, Enum
+
+logger = logging.getLogger('internet-speed')
 
 speedtest_labels = ['server_name', 'server_location']
 reachability_labels = ['target', 'protocol']
@@ -21,7 +24,8 @@ reachability = Enum('reachability', 'Status of reachability', states=['available
 
 
 def collect_speedtest_metrics(speedtest_output):
-
+    
+    logger.info("Collecting speedtest metrics...")
     if not speedtest_output or not speedtest_output['server'] or not speedtest_output['server']['name'] or not speedtest_output['server']['location']: 
         return
 
@@ -50,8 +54,11 @@ def collect_speedtest_metrics(speedtest_output):
     if (speedtest_output['isp'] is not None and speedtest_output['external_ip'] is not None):
         info.info({'isp': speedtest_output['isp'], 'external_ip': speedtest_output['external_ip']})
 
+    logger.info("Finished collecting speedtest metrics.")
+
 def collect_reachability_metrics(http_checks_output, dns_checks_output):
 
+    logger.info("Collecting HTTP reachability metrics...")
     for domain in http_checks_output:
         target = domain
         protocol = "HTTP"
@@ -64,6 +71,7 @@ def collect_reachability_metrics(http_checks_output, dns_checks_output):
         else:
             reachability.labels(target, protocol).state('unavailable')
 
+    logger.info("Collecting DNS reachability metrics...")
     for domain in dns_checks_output:
         target = domain
         protocol = "DNS"
@@ -75,3 +83,5 @@ def collect_reachability_metrics(http_checks_output, dns_checks_output):
             reachability.labels(target, protocol).state('available')
         else:
             reachability.labels(target, protocol).state('unavailable')
+
+    logger.info("Finished collecting reachability metrics.")
