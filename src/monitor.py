@@ -63,7 +63,7 @@ def run_speedtest():
     return {
             'timestamp' : output.get('timestamp', None),
             'ping': {
-                'jitter':ping.get('jitter', None),
+                'jitter': ping.get('jitter', None),
                 'latency': ping.get('latency', None)
             },
             'download': {
