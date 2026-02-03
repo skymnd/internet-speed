@@ -1,5 +1,5 @@
 
-import logger
+import logging
 from prometheus_client import Gauge, Info, Enum
 
 logger = logging.getLogger('internet-speed')
@@ -20,11 +20,11 @@ response_time = Gauge('response_time_ms', 'Response time in ms', reachability_la
 
 info = Info('speedtest_info', 'Other info i.e. ISP and external IP', namespace='internet')
 
-reachability = Enum('reachability', 'Status of reachability', states=['available', 'unavailable'], labels=reachability_labels, namespace='internet')
+reachability = Enum('reachability', 'Status of reachability', reachability_labels, states=['available', 'unavailable'], namespace='internet')
 
 
 def collect_speedtest_metrics(speedtest_output):
-    
+
     logger.info("Collecting speedtest metrics...")
     if not speedtest_output or not speedtest_output['server'] or not speedtest_output['server']['name'] or not speedtest_output['server']['location']: 
         return
