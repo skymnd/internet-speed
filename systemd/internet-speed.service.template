@@ -1,0 +1,16 @@
+[Unit]
+Description=Internet Speed Monitoring Service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=exec
+User=internet-speed
+Group=internet-speed
+WorkingDirectory=/opt/internet-speed
+ExecStart=/opt/internet-speed/venv/bin/python /opt/internet-speed/src/monitor.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
