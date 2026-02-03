@@ -25,3 +25,8 @@ mkdir /var/log/internet-speed
 ```
 source /opt/internet-speed/venv/bin/activate
 ```
+
+## Creating the user
+```
+sudo useradd --system --create-home --shell /bin/bash internet-speed --home-dir /opt/internet-speed
+```

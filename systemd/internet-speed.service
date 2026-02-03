@@ -1,0 +1,9 @@
+[Unit]
+Description=Internet Speed Monitoring Service
+
+[Service]
+Type=exec
+ExecStart=python3 
+
+[Install]
+WantedBy=multi-user.target
