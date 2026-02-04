@@ -11,6 +11,8 @@ WorkingDirectory=/opt/internet-speed
 ExecStart=/opt/internet-speed/venv/bin/python /opt/internet-speed/src/monitor.py
 Restart=always
 RestartSec=10
+StandardOutput=journal
+StandardError=journal
 
 [Install]
 WantedBy=multi-user.target

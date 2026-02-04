@@ -32,7 +32,7 @@ sudo mkdir -p /var/log/internet-speed
 sudo chown internet-speed:internet-speed /var/log/internet-speed
 
 # Copy service to systemd
-sudo cp /opt/internet-speed/systemd/internet-speed.service /etc/systemd/system/internet-speed.service
+sudo cp /opt/internet-speed/systemd/internet-speed.service.template /etc/systemd/system/internet-speed.service
 
 # Reload daemon and start service
 sudo systemctl daemon-reload
