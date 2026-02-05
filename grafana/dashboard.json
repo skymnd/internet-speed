@@ -769,7 +769,7 @@
       },
       "targets": [
         {
-          "expr": "count(internet_reachability == 1) / count(internet_reachability) * 100",
+          "expr": "count(internet_reachability{internet_reachability=\"available\"} == 1) / count(internet_reachability{internet_reachability=\"available\"}) * 100",
           "refId": "A",
           "legendFormat": "Overall Availability"
         }
