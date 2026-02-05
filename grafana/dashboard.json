@@ -30,7 +30,7 @@
         "defaults": {
           "unit": "Mbps",
           "min": 0,
-          "max": 1000,
+          "max": 600,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -78,7 +78,7 @@
         "defaults": {
           "unit": "Mbps",
           "min": 0,
-          "max": 500,
+          "max": 100,
           "thresholds": {
             "mode": "absolute",
             "steps": [
