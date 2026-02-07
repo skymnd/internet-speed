@@ -184,12 +184,13 @@ if __name__ == "__main__":
         http_start = perf_counter()
         http_reachability_checks = run_http_reachability_checks("bbc.co.uk,google.co.uk,apple.com")
         http_check_duration_milliseconds.set((perf_counter() - http_start) * 1_000)
+        collect_reachability_metrics("HTTP", http_reachability_checks)
 
         dns_start = perf_counter()
         dns_reachability_checks = run_dns_reachability_checks("1.1.1.1,8.8.8.8,192.168.1.111")
         dns_check_duration_milliseconds.set((perf_counter() - dns_start) * 1_000)
+        collect_reachability_metrics("DNS", dns_reachability_checks)
 
-        collect_reachability_metrics(http_reachability_checks, dns_reachability_checks)
         i += 1
         i = i % 3
         sleep(300)

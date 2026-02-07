@@ -56,32 +56,18 @@ def collect_speedtest_metrics(speedtest_output):
 
     logger.info("Finished collecting speedtest metrics.")
 
-def collect_reachability_metrics(http_checks_output, dns_checks_output):
+def collect_reachability_metrics(protocol, checks_output):
 
-    logger.info("Collecting HTTP reachability metrics...")
-    for domain in http_checks_output:
-        target = domain
-        protocol = "HTTP"
+    logger.info(f"Collecting {protocol} reachability metrics...")
+    for domain in checks_output:
 
-        if http_checks_output[domain]['response_time_ms'] is not None:
-            response_time.labels(target, protocol).set(http_checks_output[domain]['response_time_ms'])
+        if checks_output[domain]['response_time_ms'] is not None:
+            response_time.labels(domain, protocol).set(checks_output[domain]['response_time_ms'])
         
-        if http_checks_output[domain]['reachable']:
-            reachability.labels(target, protocol).state('available')
-        else:
-            reachability.labels(target, protocol).state('unavailable')
-
-    logger.info("Collecting DNS reachability metrics...")
-    for domain in dns_checks_output:
-        target = domain
-        protocol = "DNS"
-
-        if dns_checks_output[domain]['response_time_ms'] is not None:
-            response_time.labels(target, protocol).set(dns_checks_output[domain]['response_time_ms'])
+        if checks_output[domain]['reachable']:
+            reachability.labels(domain, protocol).state('available')
         
-        if dns_checks_output[domain]['reachable']:
-            reachability.labels(target, protocol).state('available')
         else:
-            reachability.labels(target, protocol).state('unavailable')
+            reachability.labels(domain, protocol).state('unavailable')
 
-    logger.info("Finished collecting reachability metrics.")
+    logger.info(f"Finished collecting {protocol} reachability metrics.")
