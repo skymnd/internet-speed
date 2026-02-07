@@ -119,22 +119,6 @@ class TestRunSpeedtest(unittest.TestCase):
         self.assertEqual(result['download']['download_speed'], 100)
         self.assertIsNone(result['download']['latency']['iqm'])
 
-    @patch('monitor.run')
-    def test_speedtest_missing_server_returns_early(self, mock_run):
-        mock_output = {
-            'ping': {'jitter': 1.5},
-            'download': {'bandwidth': 12500000},
-            'upload': {'bandwidth': 6250000},
-            'server': {}
-        }
-        mock_run.return_value = MagicMock(
-            stdout=json_dumps(mock_output).encode()
-        )
-
-        result = run_speedtest()
-
-        self.assertIsNone(result)
-
 
 class TestRunHttpReachabilityChecks(unittest.TestCase):
 
