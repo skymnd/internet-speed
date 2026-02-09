@@ -1,5 +1,6 @@
 import logging
 from logging.handlers import RotatingFileHandler
+from os import path
 from json import loads as jsonload, JSONDecodeError
 from subprocess import run, TimeoutExpired
 from socket import create_connection
@@ -35,10 +36,13 @@ def convert_bps_to_Mbps(bytes_per_second):
     return bytes_per_second / 125000
 
 def run_speedtest():
+    run_args = ["speedtest", "--format=json", "--server-id=23968,40628,72004"]
+    if (not path.exists('../.config/ookla/speedtest-cli.json')):
+        run_args += ["--accept-license", "--accept-gdpr"]
     try:
         logger.info('Running speed test...')
         output_bytes = run(
-                ["speedtest", "--format=json", "--server-id=23968,40628,72004"], 
+                run_args, 
                 capture_output=True,
                 timeout=60,
                 check=True
