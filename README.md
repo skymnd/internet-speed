@@ -5,8 +5,7 @@ exposing metrics via Prometheus on port 8000.
 This service was mostly created so that my Dad would stop
 asking me if I broke the WiFi.
 
-Note: Prometheus is not included with this service but
-the grafana dashboard is.
+Note: Prometheus and Grafana are not included with this service but the Grafana dashboard JSON is.
 
 I am using this on an LXC on Proxmox with 256MiB RAM, but
 usage hovers at around 65MiB.
@@ -26,6 +25,10 @@ usage hovers at around 65MiB.
 
 ## Quick Install
 
+Read through `install/install.sh` and ensure you
+understand what the script is doing.
+As below, set any environment variables you may
+want, and then take and run the install script.
 ```bash
 # Set optional env vars (or use defaults)
 export LOGS_FILE_PATH="/var/log/internet-speed/internet-speed.log"
@@ -33,7 +36,7 @@ export HTTP_DOMAINS="bbc.co.uk,google.co.uk,apple.com"
 export DNS_DOMAINS="1.1.1.1,8.8.8.8"
 
 # Run installer
-./install/install.sh
+./install.sh
 ```
 
 ## Environment Variables
@@ -47,7 +50,7 @@ export DNS_DOMAINS="1.1.1.1,8.8.8.8"
 ## Manual Installation
 
 ### Setting environment variables
-I also added my local DNS server to the list.
+You may want add e.g. your local DNS server to the list.
 ```bash
 LOGS_FILE_PATH="/var/log/internet-speed/internet-speed.log"
 HTTP_DOMAINS="bbc.co.uk,google.co.uk,apple.com"
