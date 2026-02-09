@@ -1,4 +1,3 @@
-
 import logging
 from prometheus_client import Gauge, Info, Enum
 

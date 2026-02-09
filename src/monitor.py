@@ -1,6 +1,7 @@
 import logging
+from dotenv import load_dotenv
 from logging.handlers import RotatingFileHandler
-from os import path
+from os import path, getenv
 from json import loads as jsonload, JSONDecodeError
 from subprocess import run, TimeoutExpired
 from socket import create_connection
@@ -10,7 +11,11 @@ from prometheus_client import start_http_server, Gauge
 
 from prometheus import collect_speedtest_metrics, collect_reachability_metrics
 
-log_filename = '/var/log/internet-speed/internet-speed.log'
+load_dotenv()
+
+log_filename = getenv("LOGS_FILE_PATH" ,'/var/log/internet-speed/internet-speed.log')
+http_domains = getenv("HTTP_DOMAINS", "bbc.co.uk,google.co.uk,apple.com")
+dns_domains = getenv("DNS_DOMAINS", "1.1.1.1,8.8.8.8")
 
 logger = logging.getLogger('internet-speed')
 logger.setLevel(logging.INFO)
@@ -77,14 +82,14 @@ def run_speedtest():
                 'latency': ping.get('latency', None)
             },
             'download': {
-                'download_speed': convert_bps_to_Mbps(download.get('bandwidth', None)),
+                'download_speed': convert_bps_to_Mbps(download.get('bandwidth')) if download.get('bandwidth') is not None else None,
                 'latency' : {
                     'iqm': download.get('latency', {}).get('iqm', None),
                     'jitter': download.get('latency', {}).get('jitter', None)
                 }
             },
             'upload' : {
-                'upload_speed': convert_bps_to_Mbps(upload.get('bandwidth', None)),
+                'upload_speed': convert_bps_to_Mbps(upload.get('bandwidth')) if upload.get('bandwidth') is not None else None,
                 'latency' : {
                     'iqm': upload.get('latency', {}).get('iqm', None),
                     'jitter': upload.get('latency', {}).get('jitter', None)
@@ -177,6 +182,7 @@ if __name__ == "__main__":
 
     start_http_server(8000)
 
+    # Speedtest runs every 3rd iteration (15 min), HTTP/DNS checks run every iteration (5 min)
     i = 0
     while True:
         if i == 0:
@@ -186,12 +192,12 @@ if __name__ == "__main__":
             collect_speedtest_metrics(internet_speed)
         
         http_start = perf_counter()
-        http_reachability_checks = run_http_reachability_checks("bbc.co.uk,google.co.uk,apple.com")
+        http_reachability_checks = run_http_reachability_checks(http_domains)
         http_check_duration_milliseconds.set((perf_counter() - http_start) * 1_000)
         collect_reachability_metrics("HTTP", http_reachability_checks)
 
         dns_start = perf_counter()
-        dns_reachability_checks = run_dns_reachability_checks("1.1.1.1,8.8.8.8,192.168.1.111")
+        dns_reachability_checks = run_dns_reachability_checks(dns_domains)
         dns_check_duration_milliseconds.set((perf_counter() - dns_start) * 1_000)
         collect_reachability_metrics("DNS", dns_reachability_checks)
 
