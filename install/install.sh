@@ -16,7 +16,7 @@ echo "Installing internet-speed monitor..."
 
 echo "Installing dependencies..."
 sudo apt update
-sudo apt install -y curl
+sudo apt install -y curl git python3.10-venv
 
 echo "Installing Ookla speedtest CLI..."
 curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | sudo bash
@@ -24,10 +24,14 @@ sudo apt install -y speedtest
 
 echo "Cloning repository..."
 cd /tmp
-git clone $REPO_URL internet-speed-repo
+git clone https://github.com/skymnd/internet-speed.git internet-speed-repo
 
 echo "Creating internet-speed user..."
-sudo useradd --system --create-home --home-dir /opt/internet-speed --shell /bin/bash internet-speed
+if id "internet-speed" &>/dev/null; then
+    echo "User internet-speed already exists, skipping..."
+else
+    sudo useradd --system --create-home --home-dir /opt/internet-speed --shell /bin/bash internet-speed
+fi
 
 echo "Copying files to /opt/internet-speed..."
 sudo cp -r /tmp/internet-speed-repo/. /opt/internet-speed/
