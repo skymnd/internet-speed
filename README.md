@@ -11,6 +11,12 @@ the grafana dashboard is.
 I am using this on an LXC on Proxmox with 256MiB RAM, but
 usage hovers at around 65MiB.
 
+## Screenshots
+
+![Dashboard 1](grafana/examples/dashboard1.png)
+
+![Dashboard 2](grafana/examples/dashboard2.png)
+
 ## Features
 
 - Runs Ookla speedtest every 15 minutes
