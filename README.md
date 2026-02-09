@@ -2,10 +2,14 @@
 
 A Python service that monitors internet speed and connectivity,
 exposing metrics via Prometheus on port 8000.
-Prometheus is not included with this service but
+This service was mostly created so that my Dad would stop
+asking me if I broke the WiFi.
+
+Note: Prometheus is not included with this service but
 the grafana dashboard is.
 
-I am using this on an LXC on Proxmox with 512MB RAM.
+I am using this on an LXC on Proxmox with 256MiB RAM, but
+usage hovers at around 65MiB.
 
 ## Features
 
