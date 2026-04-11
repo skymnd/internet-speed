@@ -21,7 +21,7 @@
       },
       "targets": [
         {
-          "expr": "internet_download_speed",
+          "expr": "internet_download_speed{server_name=~\"$server\"}",
           "refId": "A",
           "legendFormat": "{{server_name}}"
         }
@@ -30,7 +30,7 @@
         "defaults": {
           "unit": "Mbps",
           "min": 0,
-          "max": 600,
+          "max": 510,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -69,7 +69,7 @@
       },
       "targets": [
         {
-          "expr": "internet_upload_speed",
+          "expr": "internet_upload_speed{server_name=~\"$server\"}",
           "refId": "A",
           "legendFormat": "{{server_name}}"
         }
@@ -78,7 +78,7 @@
         "defaults": {
           "unit": "Mbps",
           "min": 0,
-          "max": 100,
+          "max": 70,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -117,12 +117,12 @@
       },
       "targets": [
         {
-          "expr": "internet_download_speed",
+          "expr": "internet_download_speed{server_name=~\"$server\"}",
           "refId": "A",
           "legendFormat": "Download - {{server_name}}"
         },
         {
-          "expr": "internet_upload_speed",
+          "expr": "internet_upload_speed{server_name=~\"$server\"}",
           "refId": "B",
           "legendFormat": "Upload - {{server_name}}"
         }
@@ -206,17 +206,17 @@
       },
       "targets": [
         {
-          "expr": "internet_ping_latency",
+          "expr": "internet_ping_latency{server_name=~\"$server\"}",
           "refId": "A",
           "legendFormat": "Ping Latency - {{server_name}}"
         },
         {
-          "expr": "internet_download_latency_iqm",
+          "expr": "internet_download_latency_iqm{server_name=~\"$server\"}",
           "refId": "B",
           "legendFormat": "Download Latency (IQM) - {{server_name}}"
         },
         {
-          "expr": "internet_upload_latency_iqm",
+          "expr": "internet_upload_latency_iqm{server_name=~\"$server\"}",
           "refId": "C",
           "legendFormat": "Upload Latency (IQM) - {{server_name}}"
         }
@@ -277,17 +277,17 @@
       },
       "targets": [
         {
-          "expr": "internet_ping_jitter",
+          "expr": "internet_ping_jitter{server_name=~\"$server\"}",
           "refId": "A",
           "legendFormat": "Ping Jitter - {{server_name}}"
         },
         {
-          "expr": "internet_download_latency_jitter",
+          "expr": "internet_download_latency_jitter{server_name=~\"$server\"}",
           "refId": "B",
           "legendFormat": "Download Jitter - {{server_name}}"
         },
         {
-          "expr": "internet_upload_latency_jitter",
+          "expr": "internet_upload_latency_jitter{server_name=~\"$server\"}",
           "refId": "C",
           "legendFormat": "Upload Jitter - {{server_name}}"
         }
@@ -340,7 +340,7 @@
       },
       "targets": [
         {
-          "expr": "internet_packet_loss",
+          "expr": "internet_packet_loss{server_name=~\"$server\"}",
           "refId": "A",
           "legendFormat": "Packet Loss - {{server_name}}"
         }
@@ -807,6 +807,21 @@
       }
     }
   ],
+  "templating": {
+    "list": [
+      {
+        "name": "server",
+        "label": "Server",
+        "type": "query",
+        "query": "query_result(sort_desc(timestamp(internet_download_speed)))",
+        "regex": "/server_name=\"([^\"]+)\"/",
+        "refresh": 2,
+        "includeAll": false,
+        "multi": false,
+        "sort": 0
+      }
+    ]
+  },
   "schemaVersion": 36,
   "version": 1,
   "tags": ["internet", "monitoring", "speed"],
